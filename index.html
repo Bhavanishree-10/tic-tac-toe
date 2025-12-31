@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Tic-Tac-Toe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* General Page Styles */
+        body {
+            background-color: #0e1014;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Container for the whole game */
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+
+        /* Header and Logo */
+        .header {
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px; /* Space between logo and text */
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: #00f3ff; /* Cyan Logo */
+            filter: drop-shadow(0 0 10px #00f3ff);
+        }
+
+        /* Game Settings and Scoreboard Area */
+        .game-panel {
+            background: #161920;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #333;
+        }
+
+        .settings {
+            margin-bottom: 15px;
+        }
+
+        select {
+            background: #000;
+            color: #00f3ff;
+            border: 1px solid #00f3ff;
+            padding: 8px 12px;
+            font-family: inherit;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .scores {
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1rem;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            font-weight: bold;
+        }
+
+        .score-item span {
+            font-size: 1.4rem;
+            margin-top: 5px;
+        }
+
+        /* Colors for different scores */
+        .p1 { color: #00f3ff; text-shadow: 0 0 5px #00f3ff; }
+        .ai { color: #ff0055; text-shadow: 0 0 5px #ff0055; }
+        .draw { color: #888; }
+
+        /* Status Text (Whose turn is it?) */
+        .status {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #ccc;
+            height: 25px;
+        }
+
+        /* The Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .box {
+            background-color: #1b1e25;
+            height: 100px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            cursor: pointer;
+            box-shadow: inset 3px 3px 8px #0f1116, inset -3px -3px 8px #262b35;
+            transition: 0.2s;
+        }
+
+        .box:hover {
+            background-color: #252932;
+        }
+
+        /* Styles for X and O */
+        .box.x { color: #00f3ff; text-shadow: 0 0 15px #00f3ff; }
+        .box.o { color: #ff0055; text-shadow: 0 0 15px #ff0055; }
+        
+        /* Highlight winning line */
+        .box.highlight {
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Reset Button */
+        .restart-btn {
+            padding: 12px 30px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: transparent;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .restart-btn:hover {
+            background: #333;
+            border-color: white;
+        }
+
+        /* Popup Modal for Game Over */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-box {
+            background: #1b1e25;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.2);
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            background: #ff0055;
+            border: none;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="header">
+            <h1>
+                NEON TACTICS
+            </h1>
+        </div>
+        
+        <div class="game-panel">
+            <div class="settings">
+                <label>Difficulty: </label>
+                <select id="level-select">
+                    <option value="easy">Basic</option>
+                    <option value="medium">Intermediate</option>
+                    <option value="hard" selected>Hard (AI)</option>
+                </select>
+            </div>
+            
+            <div class="scores">
+                <div class="score-item p1">YOU<span id="score-player">0</span></div>
+                <div class="score-item draw">TIE<span id="score-tie">0</span></div>
+                <div class="score-item ai">AI<span id="score-ai">0</span></div>
+            </div>
+        </div>
+
+        <div class="status" id="status-msg">Your Turn</div>
+
+        <div class="grid" id="game-grid">
+            <div class="box" id="0"></div>
+            <div class="box" id="1"></div>
+            <div class="box" id="2"></div>
+            <div class="box" id="3"></div>
+            <div class="box" id="4"></div>
+            <div class="box" id="5"></div>
+            <div class="box" id="6"></div>
+            <div class="box" id="7"></div>
+            <div class="box" id="8"></div>
+        </div>
+
+        <button class="restart-btn" onclick="resetEverything()">Reset Score</button>
+
+    </div>
+
+    <div class="modal-overlay" id="end-modal">
+        <div class="modal-box">
+            <h2 id="end-text">YOU WON!</h2>
+            <button class="modal-btn" onclick="nextRound()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Constants
+        const PLAYER = 'X';
+        const COMPUTER = 'O';
+        const winningLines = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+
+        // State Variables
+        let gameBoard = ["", "", "", "", "", "", "", "", ""];
+        let gameActive = true;
+        let scorePlayer = 0;
+        let scoreAi = 0;
+        let scoreTie = 0;
+
+        // DOM Elements
+        const boxes = document.querySelectorAll('.box');
+        const statusMsg = document.getElementById('status-msg');
+        const modal = document.getElementById('end-modal');
+        const levelSelect = document.getElementById('level-select');
+
+        // Setup Event Listeners
+        boxes.forEach(box => {
+            box.addEventListener('click', handleUserClick);
+        });
+
+        // Add event listener to reset when difficulty changes
+        levelSelect.addEventListener('change', resetEverything);
+
+        // --- Main Game Functions ---
+
+        function handleUserClick(e) {
+            const id = e.target.id;
+
+            // Check if box is empty and game is still going
+            if (gameBoard[id] === "" && gameActive) {
+                // 1. Player Move
+                playMove(id, PLAYER);
+
+                // 2. Check if Player Won
+                if (!checkResult(gameBoard, PLAYER)) {
+                    // 3. AI Turn (if game not over)
+                    gameActive = false; // Stop user from clicking
+                    statusMsg.innerText = "AI is thinking...";
+                    
+                    setTimeout(() => {
+                        let aiMove = getBestMove();
+                        playMove(aiMove, COMPUTER);
+                        
+                        if (!checkResult(gameBoard, COMPUTER)) {
+                            gameActive = true; // Re-enable user clicks
+                            statusMsg.innerText = "Your Turn";
+                        }
+                    }, 600); // Small delay for realism
+                }
+            }
+        }
+
+        function playMove(index, player) {
+            gameBoard[index] = player;
+            const box = document.getElementById(index);
+            box.innerText = player;
+            box.classList.add(player.toLowerCase()); // Adds 'x' or 'o' class
+        }
+
+        // --- Logic to check Wins/Draws ---
+
+        function checkResult(board, currentPlayer) {
+            let roundWon = false;
+            let winCombo = [];
+
+            // Check all winning lines
+            for (let i = 0; i < winningLines.length; i++) {
+                const [a, b, c] = winningLines[i];
+                if (board[a] === currentPlayer && board[b] === currentPlayer && board[c] === currentPlayer) {
+                    roundWon = true;
+                    winCombo = [a, b, c];
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                gameOver(currentPlayer, winCombo);
+                return true;
+            } 
+            
+            // Check for Draw
+            if (!board.includes("")) {
+                gameOver("draw", []);
+                return true;
+            }
+
+            return false;
+        }
+
+        function gameOver(winner, combo) {
+            gameActive = false;
+            
+            if (winner === "draw") {
+                document.getElementById('end-text').innerText = "IT'S A DRAW!";
+                document.getElementById('end-text').style.color = "#ccc";
+                scoreTie++;
+                document.getElementById('score-tie').innerText = scoreTie;
+            } else {
+                // Highlight winning boxes
+                combo.forEach(idx => {
+                    document.getElementById(idx).classList.add('highlight');
+                });
+
+                if (winner === PLAYER) {
+                    document.getElementById('end-text').innerText = "YOU WON!";
+                    document.getElementById('end-text').style.color = "#00f3ff";
+                    scorePlayer++;
+                    document.getElementById('score-player').innerText = scorePlayer;
+                } else {
+                    document.getElementById('end-text').innerText = "AI WINS!";
+                    document.getElementById('end-text').style.color = "#ff0055";
+                    scoreAi++;
+                    document.getElementById('score-ai').innerText = scoreAi;
+                }
+            }
+            
+            // Show modal after 1 second
+            setTimeout(() => {
+                modal.style.display = "flex";
+            }, 1000);
+        }
+
+        // --- AI Logic (The Brains) ---
+
+        function getBestMove() {
+            const difficulty = levelSelect.value;
+            const availableSpots = gameBoard.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+
+            // Level 1: Basic (Random)
+            if (difficulty === 'easy') {
+                return availableSpots[Math.floor(Math.random() * availableSpots.length)];
+            }
+
+            // Level 2: Intermediate (Block or Win, otherwise Random)
+            if (difficulty === 'medium') {
+                // Try to win
+                let winMove = findCriticalMove(COMPUTER);
+                if (winMove !== null) return winMove;
+
+                // Try to block player
+                let blockMove = findCriticalMove(PLAYER);
+                if (blockMove !== null) return blockMove;
+
+                // Random
+                return availableSpots[Math.floor(Math.random() * availableSpots.length)];
+            }
+
+            // Level 3: Hard (Unbeatable Minimax)
+            if (difficulty === 'hard') {
+                return minimax(gameBoard, COMPUTER).index;
+            }
+        }
+
+        // Helper for Intermediate level
+        function findCriticalMove(playerToCheck) {
+            for (let line of winningLines) {
+                let [a, b, c] = line;
+                let vals = [gameBoard[a], gameBoard[b], gameBoard[c]];
+                let countPlayer = vals.filter(v => v === playerToCheck).length;
+                let countEmpty = vals.filter(v => v === "").length;
+
+                if (countPlayer === 2 && countEmpty === 1) {
+                    if (gameBoard[a] === "") return a;
+                    if (gameBoard[b] === "") return b;
+                    if (gameBoard[c] === "") return c;
+                }
+            }
+            return null;
+        }
+
+        // Minimax Algorithm for Hard Level
+        function minimax(newBoard, player) {
+            // Available spots
+            let availSpots = newBoard.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+
+            // Checks for terminal states (win/lose/draw)
+            if (checkWinForMinimax(newBoard, PLAYER)) return { score: -10 };
+            if (checkWinForMinimax(newBoard, COMPUTER)) return { score: 10 };
+            if (availSpots.length === 0) return { score: 0 };
+
+            let moves = [];
+
+            // Loop through available spots
+            for (let i = 0; i < availSpots.length; i++) {
+                let move = {};
+                move.index = availSpots[i];
+
+                // Make move
+                newBoard[availSpots[i]] = player;
+
+                // Recurse
+                if (player === COMPUTER) {
+                    let result = minimax(newBoard, PLAYER);
+                    move.score = result.score;
+                } else {
+                    let result = minimax(newBoard, COMPUTER);
+                    move.score = result.score;
+                }
+
+                // Undo move
+                newBoard[availSpots[i]] = "";
+                moves.push(move);
+            }
+
+            // Find best move
+            let bestMove;
+            if (player === COMPUTER) {
+                let bestScore = -10000;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score > bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            } else {
+                let bestScore = 10000;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score < bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            }
+
+            return moves[bestMove];
+        }
+
+        function checkWinForMinimax(board, player) {
+            for (let i = 0; i < winningLines.length; i++) {
+                const [a, b, c] = winningLines[i];
+                if (board[a] === player && board[b] === player && board[c] === player) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // --- Utility Functions ---
+
+        function nextRound() {
+            // Clear board but keep scores
+            gameBoard = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            statusMsg.innerText = "Your Turn";
+            modal.style.display = "none";
+
+            boxes.forEach(box => {
+                box.innerText = "";
+                box.className = "box"; // Reset classes
+            });
+        }
+
+        function resetEverything() {
+            scorePlayer = 0;
+            scoreAi = 0;
+            scoreTie = 0;
+            document.getElementById('score-player').innerText = "0";
+            document.getElementById('score-tie').innerText = "0";
+            document.getElementById('score-ai').innerText = "0";
+            nextRound();
+        }
+
+    </script>
+</body>
+</html>
