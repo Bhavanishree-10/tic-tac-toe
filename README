@@ -1,0 +1,37 @@
+🎮 Neon Tactics (Tic-Tac-Toe)
+  Welcome to Neon Tactics! This isn't your average boring Tic-Tac-Toe game. I wanted to build something that feels modern, looks cool, and actually offers a challenge.
+  I built this project to practice front-end web development, specifically focusing on game logic and artificial intelligence.
+
+✨ Features
+  Futuristic UI: A dark, neon-themed interface with glowing effects and animations.
+  3 Difficulty Levels:
+  Basic: The AI plays randomly. Good for a confidence boost!
+  Intermediate: The AI tries to win and will block you if you're about to win, but it makes mistakes.
+  Hard (Unbeatable): I implemented the Minimax Algorithm here. The AI calculates every possible move. The best you can hope for is a draw. 😎
+  Scoreboard: Keeps track of your wins, losses, and ties during the session.
+  Responsive: Works great on desktop and looks just as good on your phone.
+
+🕹️ How to Play
+  Select your difficulty level from the dropdown menu (it defaults to Hard because I like a challenge).
+  You are X (Cyan) and the Computer is O (Pink).
+  Click any empty box to make your move.
+  Try to get 3 in a row (horizontal, vertical, or diagonal).
+  If the game ends, a popup will appear telling you who won. Click "Play Again" to keep the scores and go to the next round.
+  Hit "Reset Score" if you want to wipe the scoreboard clean.
+
+🛠️ Tech Stack
+  HTML5: For the structure of the grid and layout.
+  CSS3: Uses Flexbox and Grid for layout, plus CSS Variables for the neon colors and keyframes for the glowing animations.
+  JavaScript (Vanilla): No frameworks used. Just pure logic to handle the game state, UI updates, and the AI.
+
+🧠 The AI Logic
+  For the Hard mode, I used a recursive function called Minimax. Basically, when it's the AI's turn, it simulates playing the game out to the very end for every empty spot.
+  If a move leads to the AI winning, it gives it a score of +10.
+  If it leads to the AI losing, it gets -10.
+  If it's a tie, it gets 0. It then picks the move with the highest score. This makes it impossible to beat mathematically.
+
+🎨 Credits
+  Font: 'Orbitron' from Google Fonts (for that sci-fi look).
+  Icons: FontAwesome (for the gamepad logo).
+
+Code: Written by [Your Name Here].
